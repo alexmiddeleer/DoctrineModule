@@ -270,9 +270,7 @@ class BlogPost
 }
 ```
 
-There are two use cases for OneToOne associations: the toOne entity (in the case, the user) may
-already exist (which will often be the case with a User and BlogPost example), or it may need to be created. The
-DoctrineHydrator natively supports both cases.
+There are two possible situations that come up when using the hydrator with OneToOne associations: the toOne entity (in this case, the user) already exists (which will often be the case in situations similar to this example), or it does not exist yet and needs to be created. The DoctrineHydrator natively supports both cases.
 
 ##### Existing entity in the association
 

@@ -1,20 +1,16 @@
 ## Hydrator
 
-Hydrators are simple objects that allow to convert an array of data to an object (this is called "hydrating") and to
-convert back an object to an array (this is called "extracting"). Hydrators are mainly used in the context of Forms,
-with the new binding functionality of Zend Framework 2, but can also be used for any hydrating/extracting context (for
-instance, it can be used in RESTful context). If you are not really comfortable with hydrators, please first
+Hydrators are simple objects that allow you to convert an array of data to an object (this is called "hydrating") and the reverse (convert an object to an array of data; this is called "extracting"). Hydrators are mainly used in the context of Forms with the new binding functionality of Zend Framework 2, but can also be used in any hydrating/extracting context (for instance, they can be used in RESTful context). If you are not really comfortable with hydrators, please first
 read [Zend Framework hydrator's documentation](http://framework.zend.com/manual/2.0/en/modules/zend.stdlib.hydrator.html).
 
 
 ### Basic usage
 
-DoctrineModule ships with a very powerful hydrator that allow almost any use-case.
+DoctrineModule ships with a very powerful hydrator that allows for almost any use-case.
 
 #### Create a hydrator
 
-To create a Doctrine Hydrator, you just need one thing: an object manager (also called Entity Manager in Doctrine ORM
-or Document Manager in Doctrine ODM):
+To create a Doctrine Hydrator, you only need one thing: an object manager (also called an Entity Manager in Doctrine ORM or Document Manager in Doctrine ODM):
 
 ```php
 use DoctrineModule\Stdlib\Hydrator\DoctrineObject as DoctrineHydrator;
@@ -24,14 +20,14 @@ $hydrator = new DoctrineHydrator($objectManager);
 
 Starting from DoctrineModule 0.8.0, a hydrator can be used for multiple objects.
 
-The hydrator constructor also allows a second parameter, `byValue`, which is true by default. We will come back later
-about this distinction, but to be short, it allows the hydrator the change the way it gets/sets data by either
-accessing the public API of your entity (getters/setters) or directly get/set data through reflection, hence bypassing
-any of your custom logic.
+The hydrator constructor also allows a second parameter, `byValue`, which is true by default. We will come back to
+this distinction later, but in short, it allows the hydrator the change the way it gets/sets data by either
+by accessing the public API of your entity (the entity's getters/setters) or directly via reflection (hence, bypassing
+your entity's custom logic).
 
 #### Example 1 : simple entity with no associations
 
-Let's begin by a simple example:
+Let's begin with a simple example:
 
 ```php
 
@@ -92,10 +88,8 @@ $dataArray = $hydrator->extract($city);
 echo $dataArray['name']; // prints "Paris"
 ```
 
-As you can see from this example, in simple cases, the DoctrineModule hydrator provides nearly no benefits over a
-simpler hydrator like "ClassMethods". However, even in those cases, I suggest you to use it, as it performs automatic
-conversions between types. For instance, it can convert timestamp to DateTime (which is the type used by Doctrine to
-represent dates):
+As you can see from this example, the DoctrineModule hydrator provides few benefits over a
+simpler hydrator like "ClassMethods" in simple cases. However, I still suggest you to use it even in simple cases, as it performs automatic type conversions. For instance, it can convert timestamp to DateTime (which is the type used by Doctrine to represent dates):
 
 ```php
 
@@ -154,16 +148,15 @@ $appointment = $hydrator->hydrate($data, $appointment);
 echo get_class($appointment->getTime()); // prints "DateTime"
 ```
 
-As you can see, the hydrator automatically converted the timestamp to a DateTime object during the hydration, hence
-allowing us to have a nice API in our entity with correct typehint.
+As you can see, the hydrator automatically converted the timestamp to a DateTime object during hydration, hence providing our entity with a nice API complete with typehints.
 
 
 #### Example 2 : OneToOne/ManyToOne associations
 
-DoctrineModule hydrator is especially useful when dealing with associations (OneToOne, OneToMany, ManyToOne) and
+DoctrineModule's hydrator is especially useful when dealing with associations (OneToOne, OneToMany, ManyToOne) and
 integrates nicely with the Form/Fieldset logic ([learn more about this here](http://framework.zend.com/manual/2.0/en/modules/zend.form.collections.html)).
 
-Let's take a simple example with a BlogPost and a User entity to illustrate OneToOne association:
+Let's use a simple example with a BlogPost and a User entity to illustrate a OneToOne association:
 
 ```php
 
@@ -277,13 +270,13 @@ class BlogPost
 }
 ```
 
-There are two use cases that can arise when using OneToOne association: the toOne entity (in the case, the user) may
-already exist (which will often be the case with a User and BlogPost example), or it can be created too. The
+There are two use cases for OneToOne associations: the toOne entity (in the case, the user) may
+already exist (which will often be the case with a User and BlogPost example), or it may need to be created. The
 DoctrineHydrator natively supports both cases.
 
 ##### Existing entity in the association
 
-When the association's entity already exists, what you need to do is simply giving the identifier of the association:
+When the associated entity already exists, you only need to provide its identifier:
 
 ```php
 use DoctrineModule\Stdlib\Hydrator\DoctrineObject as DoctrineHydrator;
@@ -303,7 +296,7 @@ echo $blogPost->getTitle(); // prints "The best blog post in the world !"
 echo $blogPost->getUser()->getId(); // prints 2
 ```
 
-**NOTE** : when using association whose primary key is not compound, you can rewrite the following more succinctly:
+**NOTE** : when referencing an associated entity whose primary key is not compound, you can rewrite the following more succinctly:
 
 ```php
 $data = array(
@@ -326,7 +319,7 @@ $data = array(
 
 ##### Non-existing entity in the association
 
-If the association's entity does not exist, you just need to give the given object:
+If the associated entity does not exist yet, you can simply provide it:
 
 ```php
 use DoctrineModule\Stdlib\Hydrator\DoctrineObject as DoctrineHydrator;
@@ -348,8 +341,7 @@ echo $blogPost->getTitle(); // prints "The best blog post in the world !"
 echo $blogPost->getUser()->getId(); // prints 2
 ```
 
-For this to work, you must also slightly change your mapping, so that Doctrine can persist new entities on
-associations (note the cascade options on the OneToMany association):
+For this to work, you must also change your mapping slightly so that Doctrine can persist these new associated entities (note the cascade options on the OneToMany association):
 
 ```php
 
@@ -374,11 +366,11 @@ class BlogPost
 ```
 
 It's also possible to use a nested fieldset for the User data.  The hydrator will
-use the mapping data to determine the identifiers for the toOne relation and either
-attempt to find the existing record or instanciate a new target instance which will
+use the mapping data to determine the identifiers for the toOne related entity and either
+attempt to find an existing record which matches it or create a new record which will
 be hydrated before it is passed to the BlogPost entity.
 
-**NOTE** : you're not really allowing users to be added via a blog post, are you?
+**NOTE** : You're not really allowing users to be added via a blog post, are you?
 
 ```php
 use DoctrineModule\Stdlib\Hydrator\DoctrineObject as DoctrineHydrator;
@@ -404,17 +396,17 @@ echo $blogPost->getUser()->getPassword(); // prints 2BorN0t2B
 
 #### Example 3 : OneToMany association
 
-DoctrineModule hydrator also handles OneToMany relationships (when use `Zend\Form\Element\Collection` element). Please
+DoctrineModule's hydrator also handles OneToMany relationships (when use `Zend\Form\Element\Collection` element). Please
 refer to the official [Zend Framework 2 documentation](http://framework.zend.com/manual/2.0/en/modules/zend.form.collections.html) to learn more about Collection.
 
 > Note: internally, for a given collection, if an array contains identifiers, the hydrator automatically fetch the
-objects through the Doctrine `find` function. However, this may cause problems if one of the value of the collection
+objects through the Doctrine `find` function. However, this may cause problems if one of the values of the collection
 is the empty string '' (as the ``find`` will most likely fail). In order to solve this problem, empty string identifiers
 are simply ignored during the hydration phase. Therefore, if your database contains an empty string value as primary
-key, the hydrator could not work correctly (the simplest way to avoid that is simply to not have an empty string primary
-key, which should not happen if you use auto-increment primary keys, anyway).
+key, the hydrator might not work correctly (the simplest way to avoid that is simply to not have an empty string primary
+key, which should not happen anyway if you use auto-incrementing primary keys).
 
-Let's take again a simple example: a BlogPost and Tag entities.
+Let's take another simple example: BlogPost and Tag entities.
 
 ```php
 
